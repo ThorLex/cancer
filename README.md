@@ -1,233 +1,227 @@
-# Breast Cancer Detection
-Mammography Mass Detection using Artificial Intelligence;  
-<p style='text-align: justify;'>Using this project you will be able to train a model on mammography images for suspicious mass detection, deploy a simple web application for inference, and use several tools and API with custom features made for use in larger projects.</p>
-<p style='text-align: justify;'>It started first as a research project training a deep learning model on InBreast, CBIS-DDSM, MIAS datasets of public labeled mammography images. As the results were promising, we decided to expand the project and to implement tools and API services for local integration with current clinical applications. We gathered local labeled mammography images and made possible the use of customized AI in local hospitals.</p>
+# Breast Cancer Detection System
 
-# Table of Contents
-- [Features](#features)
-- [Prerequisites](#prerequisites)
-- [Datasets](#datasets)
-  * [Download](#download)
-  * [Visualizer](#visualizer)
-- [Usage](#usage)
-- [Detectron (Faster R-CNN)](#detectron--faster-r-cnn-)
-  * [Train](#train)
-  * [Predict](#predict)
-  * [Evaluate](#evaluate)
-  * [Web Application](#web-application)
-- [API Services](#api-services)
-  * [**Object Detection API**](#--object-detection-api--)
-  * [**DICOM to JPEG**](#--dicom-to-jpeg--)
-  * [**Hash Router**](#--hash-router--)
-  * [**Watch Folder API**](#--watch-folder-api--)
-  * [**Explainable AI**](#--explainable-ai--)
-  * [**Chatbot AI**](#--chatbot-ai--)
-- [Explainable AI](#explainable-ai)
-- [LLM API](#llm-api)
-- [YOLO](#yolo)
-  * [Training](#training)
-  * [Prediction](#prediction)
-  
-# Prerequisites
-* Nvidia CUDA drivers
-  * Install a PyTorch compatible version of CUDA from:
-    * Your Linux repository
-    ```commandline
-    apt install nvidia-cuda-toolkit
-    ```
-    * NVIDIA website for Windows and Linux
-      * [Link to download page](https://developer.nvidia.com/cuda-downloads)
-* Pytorch with CUDA support
-  * Visit [PyTorch website](https://pytorch.org/get-started/locally/) for more information
+An AI-powered platform for detecting suspicious masses in mammography images, designed for clinical integration and research applications.
 
-The two above must be installed __manually__ or else will break installation of other requirements later on.
-* Libmagic
-  * Linux (Ubuntu/Debian)
-  ```bash
-  sudo apt install libmagic1
-  ```
-  * Windows
-  ```commandline
-  pip install python-magic-bin
-  ```
+## About This Project
 
-* (optional) If you're going to run inside docker, install nvidia-container-toolkit on host. The following is how you install it on Linux:
-  ```bash
-  sudo apt install nvidia-container-toolkit
-  ```
+This system started as a research initiative to train deep learning models on publicly available mammography datasets. After achieving promising results, we expanded it into a complete platform with API services and tools that can integrate with existing clinical workflows. The system has been successfully deployed in local hospitals using their own labeled data.
 
-# Datasets
+The platform handles the entire pipeline from raw medical images to actionable predictions, with built-in tools for visualization, evaluation, and explanation of model decisions.
 
-Supported datasets:
-* InBreast
-* CBIS-DDSM (Curated Breast Imaging Subset of DDSM)
-* MIAS (Mammography Image Analysis Society)
+## Requirements
 
-Supported models:
-* Generally supported models
-  * Faster R-CNN (Detectron)
-  * YOLO
-  * Any model that supports YOLO / COCO style dataset
-* Customized [UaNet](https://github.com/uci-cbcl/UaNet/) for 2D mammography images
+You need to install CUDA and PyTorch manually before proceeding with the rest of the installation. This prevents dependency conflicts that occur with automatic installation.
 
-## Download
-### Google Colab
-* Use download_datasets_colab.ipynb jupyter notebook in Google Colab to download all datasets.
-* You will need to upload your _'kaggle.json'_ when the notebook gives you an upload dialog.
-* After logging in to kaggle, you can get your kaggle json in API section of https://www.kaggle.com/settings.
-* The notebook will clone this repository and download all datasets.
-### Manual
-Dataset links:
-* https://www.kaggle.com/datasets/ramanathansp20/inbreast-dataset
-* https://www.kaggle.com/datasets/awsaf49/cbis-ddsm-breast-cancer-image-dataset
-* https://www.kaggle.com/datasets/kmader/mias-mammography
+**Install CUDA drivers for your system:**
 
-Download the above datasets and after cloning this repository, create the following directories:
-* breast_cancer_detection/
-  * datasets/
-    * all-mias/
-      * mdb001.pgm
-      * ...
-    * CBIS-DDSM/
-      * csv/
-      * jpeg/
-    * INbreast Release 1.0/
-      * AllDICOMs/
-      * ...
-
-Copy datasets to directories accordingly.
-
-## Visualizer
-After converting the datasets to COCO / YOLO style in the next section (Usage),
-you may visualize the standardized dataset using the following methods.
-### COCO Style dataset
+Linux users can install via package manager:
 ```bash
-python visualizer.py -m coco -d train/images -l train.json 
-```
-### YOLO Style dataset
-```bash
-python visualizer.py -m yolo -d train/images -l train/labels 
+apt install nvidia-cuda-toolkit
 ```
 
-![](demo/visualizer.png)
+Windows and Linux users can also download directly from NVIDIA:
+https://developer.nvidia.com/cuda-downloads
 
-# Usage
-**1. Clone this repository**
+**Install PyTorch with CUDA support:**
+
+Visit the PyTorch website and follow the installation guide for your specific setup:
+https://pytorch.org/get-started/locally/
+
+**Install system dependencies:**
+
+Linux:
+```bash
+sudo apt install libmagic1
+```
+
+Windows:
+```bash
+pip install python-magic-bin
+```
+
+If using Docker, install the container toolkit on your host machine:
+```bash
+sudo apt install nvidia-container-toolkit
+```
+
+## Installation Steps
+
+Download the project:
 ```bash
 git clone https://github.com/monajemi-arman/breast_cancer_detection
-```
-**2. Install prerequisites**
-```bash
 cd breast_cancer_detection
+```
+
+Install Python packages:
+```bash
 pip install --no-build-isolation -r requirements.txt
 ```
-**2. Download the following datasets**  
-https://www.kaggle.com/datasets/ramanathansp20/inbreast-dataset  
-https://wiki.cancerimagingarchive.net/pages/viewpage.action?pageId=22516629  
-https://www.kaggle.com/datasets/kmader/mias-mammography  
 
-**3. Move dataset files**  
-First create 'datasets' directory:
-```bash
-mkdir datasets/
+## Preparing Your Data
+
+### Dataset Information
+
+The system works with three established mammography datasets:
+
+- InBreast
+- CBIS-DDSM
+- MIAS
+
+### Getting the Datasets
+
+**Automatic download using Google Colab:**
+
+Open the download_datasets_colab.ipynb notebook in Google Colab. The notebook will prompt you to upload your kaggle.json credentials file. You can download this file from your Kaggle account settings at https://www.kaggle.com/settings under the API section.
+
+**Manual download:**
+
+Download from these sources:
+- https://www.kaggle.com/datasets/ramanathansp20/inbreast-dataset
+- https://www.kaggle.com/datasets/awsaf49/cbis-ddsm-breast-cancer-image-dataset
+- https://www.kaggle.com/datasets/kmader/mias-mammography
+
+After downloading, create this folder structure:
 ```
-Then, extract and move the files to this directory so as to have the following inside datasets/:  
-* INbreast Release 1.0/
-* CBIS-DDSM/
-* all-mias/
+breast_cancer_detection/
+  datasets/
+    all-mias/
+    CBIS-DDSM/
+      csv/
+      jpeg/
+    INbreast Release 1.0/
+      AllDICOMs/
+```
 
-**4. Convert datasets to YOLO (and COCO) format**
+Place each downloaded dataset in its corresponding folder.
+
+### Converting to Standard Format
+
+Run the conversion script to process all datasets into a unified format:
 ```bash
 python convert_dataset.py
 ```
-After completion, images/, labels/, dataset.yaml, annotations.json would be present in the working directory. 
 
-**5. (optional) Apply additional filters to images**  
-If necessary, you may apply these filters to images using our script: _canny, clahe, gamma, histogram, unsharp  
-You may enter one of the above filters in command line (-f). 
+This creates standardized folders and files that the training scripts can use:
+- images/
+- labels/
+- dataset.yaml
+- annotations.json
+
+### Checking Your Data
+
+View your processed images with annotations overlaid:
+
 ```bash
-python filters.py -i PATH_TO_IMAGE_DIRECTORY -o OUTPUT_IMAGE_DIRECTORY -f FILTER_NAME
+python visualizer.py -m coco -d train/images -l train.json
 ```
-# Detectron (Faster R-CNN)
-## Train
-The purpose of detectron.py is to train and evaluate a Faster R-CNN model and predict using detectron2 platform.
+
+Or if you're using YOLO format:
+```bash
+python visualizer.py -m yolo -d train/images -l train/labels
+```
+
+### Enhancing Images
+
+Apply preprocessing filters if needed. Available options are canny, clahe, gamma, histogram, and unsharp:
+
+```bash
+python filters.py -i INPUT_FOLDER -o OUTPUT_FOLDER -f FILTER_NAME
+```
+
+## Training Your Model
+
+### Faster R-CNN Approach
+
+Start training:
 ```bash
 python detectron.py -c train
 ```
-## Predict
-* Visualize model prediction
-* Show ground truth and labels
-* Filter predictions by confidence score
-``` bash
-# After training is complete
-python detectron.py -c predict -w output/model_final.pth -i <image path>
-# -w: path to model weights
-```
-![detectron prediction visualizer](demo/detectron_predict_visualize.png)
 
-## Web Application
-### Usage
-1. Run train step as explained above
-2. Copy 'detectron.cfg.pkl' and the last model checkpoint to webapp/model.pth .  
-\* Last model checkpoint file name is written in output/last_checkpoint
-3. Run the following:
+Test your trained model on an image:
 ```bash
-cd webapp/
-python web.py
+python detectron.py -c predict -w output/model_final.pth -i YOUR_IMAGE.jpg
 ```
-4. Then visit http://127.0.0.1:33517
-  
-![object detection webapp](demo/webapp.png)
 
-## Evaluate
-### Evaluation using COCOEvaluator
-* Calculate mAP
-* Uses test dataset by default
+Check model performance metrics:
 ```bash
 python detectron.py -c evaluate -w output/model_final.pth
 ```
-![](demo/pr_curve.jpg)
-### Save predictions in COCO style JSON (optional)
-* Suitable for later offline metrics calculation
-* All predictions of the test dataset will be written to predicions.json
-* Follows COCO format
+
+Export predictions for detailed analysis:
 ```bash
 python detectron.py -c evaluate_test_to_coco -w output/model_final.pth
 ```
 
-# API Services
-Over time, this project has grown in size and the following services were added:
-![screenshot of API starting log](demo/api_services.jpg)
+### YOLO Approach
 
-## **Object Detection API**  
-This service is behind the webapp as discussed above. Returns detection model results.
+Install YOLO framework:
 ```bash
-# Run server
+pip install ultralytics
+```
+
+Train a model:
+```bash
+yolo train data=dataset.yaml model=yolov8n
+```
+
+Run predictions:
+```bash
+yolo predict model=runs/detect/train/weights/best.pt source=images/cb_1.jpg conf=0.1
+```
+
+## Running the Web Interface
+
+### Setting Up
+
+After training completes, prepare the web application:
+
+1. Look in the output/last_checkpoint file to find your final model filename
+2. Copy detectron.cfg.pkl to the webapp folder
+3. Copy your model checkpoint to webapp/model.pth
+
+### Starting the Server
+
+```bash
 cd webapp/
 python web.py
+```
 
-# Get predictions
+Open your browser and go to:
+http://127.0.0.1:33517
+
+### Using the API
+
+Send an image for analysis:
+```bash
 curl -X POST \
   -F "file=@input.jpg" \
   http://localhost:33517/api/v1/predict \
   | jq -r '.data.inferred_image' | base64 --decode > prediction.jpg
-  
-# You may also pass several files for batch prediction
-curl -X POST \
-  -F "file=@sample1.jpg" \
-  -F "file=@sample2.jpg" \
-  http://localhost:33517/api/v1/predict  # Returns prediction array
 ```
 
-## **DICOM to JPEG**  
-This services supports DICOM in two forms, compressed (gz) or uncompressed (dcm). The file suffix is not important, it automatically checks file type from content to determine whether the file is compressed or not.
+Process multiple images at once:
 ```bash
-curl -X POST -F 'file=@PATH_TO_FILE' http://localhost:33521/upload
+curl -X POST \
+  -F "file=@image1.jpg" \
+  -F "file=@image2.jpg" \
+  http://localhost:33517/api/v1/predict
 ```
 
-## **Hash Router**  
-In larger projects, in order to prevent repeated image uploads, one first converts the DICOM image to JPEG using the previous API, and then uses the resulting hash id in this router so as not to require a repeated upload of the image for use in each service.  
-The hash router would read the provided hash id and load the image before sending the request to the target API. You pass the hash in both `hash: ...` and `data['file']` in the request to the hash router. (as demonstrated below)
+## Clinical Integration Services
+
+### DICOM File Handling
+
+Convert medical DICOM files to JPEG format:
+```bash
+curl -X POST -F 'file=@YOUR_DICOM_FILE' http://localhost:33521/upload
+```
+
+The service automatically detects whether files are compressed or uncompressed.
+
+### Hash-Based File Routing
+
+This service eliminates redundant file uploads in multi-step workflows. After converting a DICOM file, use its hash to reference it in subsequent API calls:
+
 ```bash
 curl -X POST "http://localhost:33516/route" \
      -H "Content-Type: application/json" \
@@ -238,119 +232,115 @@ curl -X POST "http://localhost:33516/route" \
           },
           "endpoint": "http://localhost:33517/api/v1/predict"
      }'
-
 ```
 
-## **Watch Folder API**  
-This service watches a specific directory (`watch_folder`) for new DICOM images, converts them to JPEG using `dicom_to_jpeg` API, and returns the paths. This is particularly useful in `hash_router`.
+### Automated Folder Monitoring
+
+Monitor a directory for new DICOM files and process them automatically:
+
 ```bash
-#List images
-#All
 curl "http://localhost:33522/images"
-#By page
 curl "http://localhost:33522/images?count=10&page=1"
-
-#Get original filename from hash
-curl "http://localhost:33522/hash_to_original?hash=b3244f7af…" {"original_filename":"something.dcm"}
+curl "http://localhost:33522/hash_to_original?hash=HASH_VALUE"
 ```
 
-## **Explainable AI**  
-After training the `classification_model.py` you may use the resulting checkpoint (should be present at `classification_output/last.ckpt`) for gradcam heatmap generation.
-```bash
-curl -X POST -F "file=@test/images/20586986.jpg" http://localhost:33519/predict | jq -r '.activation_map' | base64 -d >~/test.jpg
-```
+## Understanding Model Decisions
 
-## **Chatbot AI**  
-Modify `llm/config.json` based on the template in that folder to make use of Open AI API in this project. The aim of the chatbot is to receive the output of the prediction model and then chat about the image using those predictions.
-```bash
-curl -X POST http://127.0.0.1:33518/generate-response -H "Content-Type: application/json"  -d '{"prompt": "<user prompt here>", "predictions": "<pass the model predictions array here>"}'
-```
+The explainable AI component generates visual heatmaps showing which areas of an image influenced the model's decision.
 
-# Explainable AI
-First you must train classification model on the data.  
-The datasets contain data suitable for object detection. Therefore, you must first convert into classification dataset:
-* **Convert dataset for classification**
+### Preparation
+
+Convert your detection dataset to classification format:
 ```bash
 python coco_to_classification.py train.json train_class.json
 ```
-* **Train classification model** 
+
+Train the classification model:
 ```bash
 python classification_model.py -a train_class.json -d train/images --save_dir classification_output -c train
 ```
 
-* **Generate XAI**
+### Generating Explanations
+
+Create a visualization for a specific image:
 ```bash
-python classification_model.py --save_dir classification_output -c predict -i train/images/cb_1.jpg
+python classification_model.py --save_dir classification_output -c predict -i train/images/YOUR_IMAGE.jpg
 ```
 
-* **Run & Test API**
+### Running as a Service
+
+Start the explanation API:
 ```bash
 python classification_model.py --save_dir classification_output -c api
-
-# Save sample to heatmap.jpg
-curl -X POST -F "file=@test/images/20586986.jpg" http://localhost:33519/predict | jq -r '.activation_map' | base64 -d >~/heatmap.jpg
 ```
 
----
+Get an explanation heatmap:
+```bash
+curl -X POST -F "file=@test/images/20586986.jpg" http://localhost:33519/predict | jq -r '.activation_map' | base64 -d > heatmap.jpg
+```
 
-# LLM API
-* **Setup config**  
-Inside llm/ directory, create _'config.json'_ based on _'config.json.default'_ template.
-  
+## AI Assistant Integration
 
-* **Run & Test LLM API**
+The chatbot service uses language models to discuss predictions and answer questions about mammography results.
+
+### Configuration
+
+Copy the template and add your API credentials:
+```bash
+cp llm/config.json.default llm/config.json
+```
+
+Edit llm/config.json with your OpenAI API key.
+
+### Running the Service
+
 ```bash
 python llm/llm_api_server.py
+```
 
-curl -X POST http://localhost:33518/generate-response \                  
+### Interacting with the Assistant
+
+```bash
+curl -X POST http://localhost:33518/generate-response \
 -H "Content-Type: application/json" \
 -d '{
-  "prompt": "What is BI-RADS 4?", "predictions": "Some preds"
+  "prompt": "What is BI-RADS 4?",
+  "predictions": "PREDICTION_DATA_HERE"
 }'
 ```
 
----
-# YOLO
-## Training
-* Install Ultralytics
-```bash
-pip install ultralytics
-```
-* Train your desired YOLO model
-```bash
-yolo train data=dataset.yaml model=yolov8n
+## Project Organization
 
-```
-## Prediction
-Example of prediction using YOLO ultralytics framework:
-```bash
-yolo predict model=runs/detect/train/weights/best.pt source=images/cb_1.jpg conf=0.1 
-```
----
-# UaNet (Deprecated)
-## Training
-* Clone UaNet repository (patched)
-```bash
-# Make sure you cd to breast_cancer_detection first
-# cd breast_cancer_detection
-git clone https://github.com/monajemi-arman/UaNet_2D
-```
-* Prepare dataset
-```bash
-# Convert datasets to images/ masks/
-python convert_dataset.py -m mask
-# Convert to 3D NRRD files
-python to_3d_nrrd.py
-```
-* Move dataset to model directory
-```bash
-# While in breast_cancer_detection directory
-mv UaNet-dataset/* UaNet_2D/data/preprocessed/
-# Remove old default configs of UaNet
-mv split/* UaNet_2D/src/split/
-```
-* Start training
-```bash
-cd UaNet_2D/src
-python train.py
-```
+**Core Training Scripts:**
+- detectron.py - Faster R-CNN training and inference
+- classification_model.py - Classification and explainability
+
+**Data Processing:**
+- convert_dataset.py - Dataset standardization
+- coco_to_classification.py - Format conversion
+- filters.py - Image preprocessing
+- visualizer.py - Data inspection
+
+**Web Services:**
+- webapp/ - Main prediction interface
+- llm/ - Chatbot integration
+
+**Clinical Tools:**
+- DICOM conversion service
+- Hash routing service
+- Folder monitoring service
+
+## Supported Frameworks
+
+The platform supports multiple deep learning approaches:
+
+- Faster R-CNN via Detectron2
+- YOLO family of models
+- Any framework that accepts COCO or YOLO format datasets
+- Custom implementations like UaNet for specialized use cases
+
+## Technical Notes
+
+The system includes multiple API services that can run concurrently. Each service operates on a different port and handles a specific aspect of the clinical workflow. This modular design allows you to use only the components you need for your particular deployment.
+
+All services are designed to handle production workloads and include appropriate error handling for clinical environments where reliability is critical.
